@@ -1,0 +1,45 @@
+name: action
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  sync-to-gitlab:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          path: authentication
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "신창엽"
+          git config --global user.email "schy2504@naver.com"
+
+      - name: Install rsync
+        run: sudo apt-get install rsync
+
+      - name: Configure merge strategy for pull
+        run: git config --global pull.rebase false
+
+      - name: Sync to Gitlab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          git clone --branch authentication https://oauth2:$GITLAB_TOKEN@lab.ssafy.com/s10-bigdata-recom-sub2/S10P22D204.git S10P22D204
+          mkdir -p S10P22D204/authentication
+          rsync -av --delete --exclude='.git/' --exclude='.github/' ./authentication/ S10P22D204/authentication/
+          cd S10P22D204
+          git add authentication/
+          git_status=$(git status --porcelain)
+          if [ ! -z "$git_status" ]; then
+            git commit -m "authentication server develop update"
+            git push origin authentication --force
+          else
+            echo "No changes to commit."
+          fi
+
