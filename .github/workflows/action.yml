@@ -32,7 +32,7 @@ jobs:
         run: |
           git clone --branch authentication https://oauth2:$GITLAB_TOKEN@lab.ssafy.com/s10-bigdata-recom-sub2/S10P22D204.git S10P22D204
           mkdir -p S10P22D204/authentication
-          rsync -av --delete --exclude='.git/' --exclude='.github/' ./authentication/ S10P22D204/authentication/
+          rsync -av --delete --exclude='.git/' --exclude='.github/' --exclude='./Dockerfile' --exclude='./docker-compose.yml' ./authentication/ S10P22D204/authentication/
           cd S10P22D204
           git add authentication/
           git_status=$(git status --porcelain)
@@ -42,4 +42,51 @@ jobs:
           else
             echo "No changes to commit."
           fi
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Fetch config from Vault and create application.properties
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+        run: |
+          curl --header "X-Vault-Token: ${VAULT_TOKEN}" ${VAULT_ADDR}/v1/secret/data/myapp/config > config.json
+          jq -r '.data.data | to_entries[] | "\(.key)=\(.value)"' config.json > src/main/resources/application.properties
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/auth
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/project/auth
+            git pull
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d
+            docker image prune -f
+            
 
