@@ -82,7 +82,7 @@ jobs:
             -p 8081:8081 \
             --network=bridge \
             --restart unless-stopped \
-            ${DOCKERHUB_USERNAME}/auth
+            ${username}/auth
             docker container prune -f
             docker image prune -f
             
