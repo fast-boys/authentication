@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "=== application.properties ==="
           ls -al; cd src; ls -al; cd main; ls -al; cd resources; ls -al;
-          cat src/main/resources/application.properties
+          cat application.properties
           echo "============================="
 
       - name: Log in to Docker Hub
