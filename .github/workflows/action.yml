@@ -76,9 +76,14 @@ jobs:
           script: |
             cd /home/ubuntu/project/auth
             git pull
-            docker-compose down
-            docker-compose pull
-            docker-compose up -d
+            docker stop auth
+            docker rm auth
+            docker run --name auth -d \
+            -p 8081:8081 \
+            --network=bridge \
+            --restart unless-stopped \
+            ${DOCKERHUB_USERNAME}/auth
+            docker container prune -f
             docker image prune -f
             
 
