@@ -1,0 +1,5 @@
+services:
+    auth:
+        image: 404notfoundll/auth
+        ports:
+            - "8081:8081"
