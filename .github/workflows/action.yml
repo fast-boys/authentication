@@ -57,6 +57,13 @@ jobs:
           curl --header "X-Vault-Token: ${VAULT_TOKEN}" ${VAULT_ADDR}/v1/spring/data/application > config.json
           jq -r '.data.data | to_entries[] | "\(.key)=\(.value)"' config.json > src/main/resources/application.properties
 
+      - name: Show application.properties content (for debugging)
+        run: |
+          echo "=== application.properties ==="
+          ls -al; cd src; ls al; cd main; ls -al; cd resources; ls -al;
+          cat src/main/resources/application.properties
+          echo "============================="
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
         with:
