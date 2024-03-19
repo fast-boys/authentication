@@ -3,3 +3,5 @@ services:
         image: 404notfoundll/auth
         ports:
             - "8081:8081"
+        networks:
+            - bridge
