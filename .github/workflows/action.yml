@@ -74,15 +74,13 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/ubuntu/project/auth
-            git pull
-            docker stop auth
-            docker rm auth
+            docker stop auth || true
+            docker rm auth || true
             docker run --name auth -d \
             -p 8081:8081 \
             --network=bridge \
             --restart unless-stopped \
-            ${username}/auth
+            ${{ secrets.DOCKERHUB_USERNAME }}/auth
             docker container prune -f
             docker image prune -f
             
