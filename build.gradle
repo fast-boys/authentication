@@ -53,6 +53,10 @@ dependencies {
 
 	// R2DBC MariaDB
 	implementation 'org.mariadb:r2dbc-mariadb:1.0.1'
+
+	// vault
+	implementation 'org.springframework.cloud:spring-cloud-starter-vault-config'
+	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
 }
 
 dependencyManagement {
