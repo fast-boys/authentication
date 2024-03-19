@@ -51,10 +51,10 @@ jobs:
 
       - name: Fetch config from Vault and create application.properties
         env:
-          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }} # Vault 주소
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }} # Vault 토큰
         run: |
-          curl --header "X-Vault-Token: ${VAULT_TOKEN}" ${VAULT_ADDR}/v1/secret/data/myapp/config > config.json
+          curl --header "X-Vault-Token: ${VAULT_TOKEN}" ${VAULT_ADDR}/v1/spring/data/application > config.json
           jq -r '.data.data | to_entries[] | "\(.key)=\(.value)"' config.json > src/main/resources/application.properties
 
       - name: Log in to Docker Hub
