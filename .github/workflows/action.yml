@@ -32,7 +32,7 @@ jobs:
         run: |
           git clone --branch authentication https://oauth2:$GITLAB_TOKEN@lab.ssafy.com/s10-bigdata-recom-sub2/S10P22D204.git S10P22D204
           mkdir -p S10P22D204/authentication
-          rsync -av --delete --exclude='.git/' --exclude='.github/' --exclude='Dockerfile' --exclude='docker-compose.yml' ./authentication/ S10P22D204/authentication/
+          rsync -av --delete --exclude='.git/' --exclude='.github/' --exclude='./Dockerfile' --exclude='./docker-compose.yml' ./authentication/ S10P22D204/authentication/
           cd S10P22D204
           git add authentication/
           git_status=$(git status --porcelain)
