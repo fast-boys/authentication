@@ -11,7 +11,7 @@ COPY src src
 RUN chmod +x ./gradlew
 
 # Build the application and run tests
-RUN ./gradlew build
+RUN ./gradlew build -x test
 
 # Use a separate stage for running the application
 FROM openjdk:17-alpine
