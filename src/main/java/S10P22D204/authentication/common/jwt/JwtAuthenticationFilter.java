@@ -23,9 +23,7 @@ public class JwtAuthenticationFilter implements WebFilter {
             /* authentication server */
             "/auth/.*",
             /* search server */
-            "/search/.*",
-            /*test*/
-            "/test/.*"
+            "/search/.*"
     );
 
     @Override

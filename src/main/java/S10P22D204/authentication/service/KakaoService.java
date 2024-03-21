@@ -1,5 +1,7 @@
 package S10P22D204.authentication.service;
 
+import S10P22D204.authentication.common.exception.CustomException;
+import S10P22D204.authentication.common.exception.ExceptionType;
 import S10P22D204.authentication.common.jwt.JwtManager;
 import S10P22D204.authentication.entity.Provider;
 import S10P22D204.authentication.entity.Users;
@@ -59,8 +61,17 @@ public class KakaoService {
                         .with("redirect_uri", redirectUri)
                         .with("grant_type", "authorization_code"))
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new CustomException(ExceptionType.CLIENT_ERROR)))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new CustomException(ExceptionType.SERVER_ERROR)))
                 .bodyToMono(JsonNode.class)
-                .map(response -> response.get("access_token"));
+                .handle((response, sink) -> {
+                    JsonNode accessToken = response.get("access_token");
+                    if (accessToken == null) {
+                        sink.error(new CustomException(ExceptionType.NOT_VALID_TOKEN));
+                        return;
+                    }
+                    sink.next(accessToken);
+                });
     }
 
     private Mono<JsonNode> fetchUsersInfo(JsonNode accessToken) {
@@ -75,7 +86,7 @@ public class KakaoService {
         Users newUsers = new Users();
         newUsers.setInternalId(String.valueOf(UUID.randomUUID()));
         newUsers.setProvider(Provider.KAKAO);
-        newUsers.setProviderId(UsersInfo.get("email").asText()); // Assuming email as internalId
+        newUsers.setProviderId(UsersInfo.get("email").asText());
         newUsers.setNickname(UsersInfo.get("name").asText());
         return usersRepository.save(newUsers);
     }

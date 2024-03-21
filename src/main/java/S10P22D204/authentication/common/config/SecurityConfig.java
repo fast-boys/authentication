@@ -29,9 +29,7 @@ public class SecurityConfig {
             /* authentication server */
             "/auth/**",
             /* search server */
-            "/search/**",
-            /*test*/
-            "/test/**"
+            "/search/**"
     };
 
     @Bean
@@ -68,6 +66,7 @@ public class SecurityConfig {
                 .pathMatchers(PERMIT_URL_ARRAY).permitAll()
                 .anyExchange().permitAll());
 
+        // filter
         http.addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION);
 
         return http.build();
