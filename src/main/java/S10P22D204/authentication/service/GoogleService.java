@@ -25,7 +25,7 @@ public class GoogleService {
     @Value("${spring.security.oauth2.client.provider.google.token-uri}")
     private String googleTokenUri;
     @Value("${spring.security.oauth2.client.provider.google.user-info-uri}")
-    private String googleUsersInfoUri;
+    private String googleUserInfoUri;
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
@@ -61,7 +61,7 @@ public class GoogleService {
 
     private Mono<JsonNode> fetchUsersInfo(JsonNode accessToken) {
         return webClient.get()
-                .uri(googleUsersInfoUri)
+                .uri(googleUserInfoUri)
                 .headers(headers -> headers.setBearerAuth(accessToken.asText()))
                 .retrieve()
                 .bodyToMono(JsonNode.class);

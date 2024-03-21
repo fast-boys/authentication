@@ -9,15 +9,15 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/api/oauth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final KakaoService kakaoService;
     private final GoogleService googleService;
 
-    @GetMapping("/kako/{authenticationCode}")
-    public Mono<Response> kakoLogin(@PathVariable String authenticationCode, ServerWebExchange exchange){
+    @GetMapping("/kakao/{authenticationCode}")
+    public Mono<Response> kakaoLogin(@PathVariable String authenticationCode, ServerWebExchange exchange){
         return kakaoService.kakaoLogin(authenticationCode, exchange)
                 .map(result -> new Response("login", result));
     }
