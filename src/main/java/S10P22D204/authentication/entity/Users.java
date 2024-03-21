@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Table("users")
-public class User {
+public class Users {
 
     @Id
     private Long id;

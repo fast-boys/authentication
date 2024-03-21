@@ -21,9 +21,11 @@ public class JwtAuthenticationFilter implements WebFilter {
 
     private static final List<String> PERMIT_URL_LIST = List.of(
             /* authentication server */
-            "/auth/**",
+            "/auth/.*",
             /* search server */
-            "/search/**"
+            "/search/.*",
+            /*test*/
+            "/test/.*"
     );
 
     @Override

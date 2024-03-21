@@ -1,13 +1,11 @@
 server:
   port: 8081
-  servlet:
-    context-path: /api
 
 spring:
   config:
     import: vault://
   application:
-    name: application
+    name: local
   cloud:
     vault:
       authentication: TOKEN
@@ -15,5 +13,5 @@ spring:
       kv:
         enabled: true
         backend: spring
-        default-context: application
+        default-context: local
       uri: http://j10d204.p.ssafy.io:8200
