@@ -76,6 +76,7 @@ jobs:
           script: |
             docker stop auth || true
             docker rm auth || true
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/auth:latest
             docker run --name auth -d \
             -p 8081:8081 \
             --network=bridge \
