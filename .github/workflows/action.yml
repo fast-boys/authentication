@@ -55,7 +55,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
             
-      - name: Push Docker image with tage
+      - name: Push Docker image with tag
         uses: docker/build-push-action@v2
         with:
           context: .
