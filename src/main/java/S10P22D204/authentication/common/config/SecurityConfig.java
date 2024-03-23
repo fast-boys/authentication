@@ -75,15 +75,16 @@ public class SecurityConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOrigin("*");
+        corsConfig.addAllowedOriginPattern("*"); // 모든 출처에 대한 패턴 사용
         corsConfig.addAllowedMethod("*");
         corsConfig.addAllowedHeader("*");
-        corsConfig.setAllowCredentials(true);
-        corsConfig.setMaxAge(3600L); // 1 hour
+        corsConfig.setAllowCredentials(true); // 쿠키/인증 정보 포함 허용
+        corsConfig.setMaxAge(3600L); // 1시간
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource(new PathPatternParser());
         source.registerCorsConfiguration("/**", corsConfig);
 
         return new CorsWebFilter(source);
     }
+
 }
