@@ -91,6 +91,6 @@ jobs:
             --restart unless-stopped \
             ${{ secrets.DOCKERHUB_USERNAME }}/auth:v${{ github.run_number }}
             docker container prune -f
-            docker image prune -f
+            docker images | grep '${{ secrets.DOCKERHUB_USERNAME }}/auth' | grep -v 'v${{ github.run_number }}' | awk '{print $3}' | xargs -r docker rmi
             
 
