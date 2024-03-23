@@ -84,7 +84,7 @@ public class GoogleService {
     private Mono<Users> registerUsers(JsonNode UsersInfo) {
         Users newUsers = new Users();
         newUsers.setInternalId(String.valueOf(UUID.randomUUID()));
-        newUsers.setProvider(Provider.KAKAO);
+        newUsers.setProvider(Provider.GOOGLE);
         newUsers.setProviderId(UsersInfo.get("email").asText());
         newUsers.setNickname(UsersInfo.get("name").asText());
         return usersRepository.save(newUsers);
