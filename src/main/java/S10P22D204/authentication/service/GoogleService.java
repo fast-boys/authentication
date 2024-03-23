@@ -86,7 +86,7 @@ public class GoogleService {
         newUsers.setInternalId(String.valueOf(UUID.randomUUID()));
         newUsers.setProvider(Provider.GOOGLE);
         newUsers.setProviderId(UsersInfo.get("email").asText());
-        newUsers.setNickname(UsersInfo.get("name").asText());
+        newUsers.setNickname(UsersInfo.get("nickname").asText());
         return usersRepository.save(newUsers);
     }
 }
