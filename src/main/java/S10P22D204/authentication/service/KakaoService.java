@@ -86,8 +86,14 @@ public class KakaoService {
         Users newUsers = new Users();
         newUsers.setInternalId(String.valueOf(UUID.randomUUID()));
         newUsers.setProvider(Provider.KAKAO);
-        newUsers.setProviderId(UsersInfo.get("email").asText());
-        newUsers.setNickname(UsersInfo.get("name").asText());
+
+        JsonNode kakaoAccountNode = UsersInfo.path("kakao_account");
+        String email = kakaoAccountNode.path("email").asText();
+        newUsers.setProviderId(email);
+
+        String nickname = UsersInfo.path("properties").path("nickname").asText();
+        newUsers.setNickname(nickname);
+
         return usersRepository.save(newUsers);
     }
 }
