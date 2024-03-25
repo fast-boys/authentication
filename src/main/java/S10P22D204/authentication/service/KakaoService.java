@@ -42,13 +42,19 @@ public class KakaoService {
     public Mono<String> kakaoLogin(String authenticationCode, ServerWebExchange exchange) {
         return requestAccessToken(authenticationCode)
                 .flatMap(this::fetchUsersInfo)
-                .flatMap(userInfo -> usersRepository.findByProviderAndProviderId(Provider.GOOGLE, userInfo.get("id").asText())
-                        .switchIfEmpty(Mono.defer(() -> registerUsers(userInfo)))
-                        .flatMap(user -> jwtManager.createAccessToken(user.getInternalId(), exchange)
-                                .then(jwtManager.createRefreshToken(user.getInternalId(), exchange))
-                                .thenReturn("로그인 성공")))
+                .flatMap(userInfo -> {
+                    JsonNode kakaoAccountNode = userInfo.path("kakao_account");
+                    String email = kakaoAccountNode.path("email").asText();
+
+                    return usersRepository.findByProviderAndProviderId(Provider.KAKAO, email)
+                            .switchIfEmpty(Mono.defer(() -> registerUsers(userInfo)))
+                            .flatMap(user -> jwtManager.createAccessToken(user.getInternalId(), exchange)
+                                    .then(jwtManager.createRefreshToken(user.getInternalId(), exchange))
+                                    .thenReturn("로그인 성공"));
+                })
                 .defaultIfEmpty("로그인 실패 또는 처리 오류");
     }
+
 
 
     private Mono<JsonNode> requestAccessToken(String authenticationCode) {
