@@ -30,6 +30,9 @@ public class Users {
     @Column("nickname")
     private String nickname;
 
+    @Column("profile_image")
+    private String profileImage = "profiles/defaultProfile.svg";
+
     @Column("survey_status")
     private Boolean surveyStatus = false;
 

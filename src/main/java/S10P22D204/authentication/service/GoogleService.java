@@ -87,6 +87,7 @@ public class GoogleService {
         newUsers.setProvider(Provider.GOOGLE);
         newUsers.setProviderId(UsersInfo.get("email").asText());
         newUsers.setNickname(UsersInfo.get("email").asText());
+
         return usersRepository.save(newUsers);
     }
 }

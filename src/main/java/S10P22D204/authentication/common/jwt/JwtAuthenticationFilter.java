@@ -1,5 +1,6 @@
 package S10P22D204.authentication.common.jwt;
 
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
@@ -41,9 +42,16 @@ public class JwtAuthenticationFilter implements WebFilter {
                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                         return exchange.getResponse().setComplete();
                     } else {
-                        exchange.getResponse().getHeaders().add(jwtManager.INTERNAL_ID_HEADER, internalId);
-                        exchange.getResponse().getHeaders().add(jwtManager.SECRET_KEY_HEADER, "fastand6");
-                        return chain.filter(exchange);
+                        ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate();
+
+                        requestBuilder.header(jwtManager.INTERNAL_ID_HEADER, internalId);
+                        requestBuilder.header(jwtManager.SECRET_KEY_HEADER, "fastand6");
+
+                        ServerWebExchange mutatedExchange = exchange.mutate()
+                                .request(requestBuilder.build())
+                                .build();
+
+                        return chain.filter(mutatedExchange);
                     }
                 });
     }
