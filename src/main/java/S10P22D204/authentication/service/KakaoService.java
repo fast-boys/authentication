@@ -36,7 +36,7 @@ public class KakaoService {
     private String clientId;
     @Value("${spring.security.oauth2.client.registration.kakao.client-secret}")
     private String clientSecret;
-    @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri-be}")
+    @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri-deploy}")
     private String redirectUri;
 
     public Mono<String> kakaoLogin(String authenticationCode, ServerWebExchange exchange) {
