@@ -23,7 +23,7 @@ public class JwtManager {
 
     private final TokenRepository tokenRepository;
 
-    public final String INTERNAL_ID_HEADER = "InternalId";
+    public final String INTERNAL_ID_HEADER = "INTERNAL_ID_HEADER";
     public final String SECRET_KEY_HEADER = "SecretKey";
 
     @Value("${spring.jwt.secret.access}")
