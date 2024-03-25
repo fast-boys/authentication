@@ -41,7 +41,7 @@ public class GoogleService {
     public Mono<String> googleLogin(String authenticationCode, ServerWebExchange exchange) {
         return requestAccessToken(authenticationCode)
                 .flatMap(this::fetchUsersInfo)
-                .flatMap(userInfo -> usersRepository.findByProviderAndProviderId(Provider.GOOGLE, userInfo.get("id").asText())
+                .flatMap(userInfo -> usersRepository.findByProviderAndProviderId(Provider.GOOGLE, userInfo.get("email").asText())
                         .switchIfEmpty(Mono.defer(() -> registerUsers(userInfo)))
                         .flatMap(user -> jwtManager.createAccessToken(user.getInternalId(), exchange)
                                 .then(jwtManager.createRefreshToken(user.getInternalId(), exchange))
@@ -84,9 +84,9 @@ public class GoogleService {
     private Mono<Users> registerUsers(JsonNode UsersInfo) {
         Users newUsers = new Users();
         newUsers.setInternalId(String.valueOf(UUID.randomUUID()));
-        newUsers.setProvider(Provider.KAKAO);
+        newUsers.setProvider(Provider.GOOGLE);
         newUsers.setProviderId(UsersInfo.get("email").asText());
-        newUsers.setNickname(UsersInfo.get("name").asText());
+        newUsers.setNickname(UsersInfo.get("email").asText());
         return usersRepository.save(newUsers);
     }
 }

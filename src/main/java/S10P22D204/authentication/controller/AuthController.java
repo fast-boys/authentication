@@ -16,15 +16,15 @@ public class AuthController {
     private final KakaoService kakaoService;
     private final GoogleService googleService;
 
-    @GetMapping("/kakao/{authenticationCode}")
-    public Mono<Response> kakaoLogin(@PathVariable String authenticationCode, ServerWebExchange exchange){
-        return kakaoService.kakaoLogin(authenticationCode, exchange)
+    @GetMapping("/kakao")
+    public Mono<Response> kakaoLogin(@RequestParam String code, ServerWebExchange exchange){
+        return kakaoService.kakaoLogin(code, exchange)
                 .map(result -> new Response("login", result));
     }
 
-    @GetMapping("/google/{authenticationCode}")
-    public Mono<Response> googleLogin(@PathVariable String authenticationCode, ServerWebExchange exchange){
-        return googleService.googleLogin(authenticationCode, exchange)
+    @GetMapping("/google")
+    public Mono<Response> googleLogin(@RequestParam String code, ServerWebExchange exchange){
+        return googleService.googleLogin(code, exchange)
                 .map(result -> new Response("login", result));
     }
 
