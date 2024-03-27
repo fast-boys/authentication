@@ -8,6 +8,8 @@ import reactor.core.publisher.Mono;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 @Component
 @RequiredArgsConstructor
 public class TokenRepository {
@@ -16,11 +18,12 @@ public class TokenRepository {
 
     private final RedissonReactiveClient redissonClient;
 
-    public Mono<Void> addToken(String token, String val) {
+    public Mono<Void> addToken(String token, String val, long ttlMillis) {
         RBucketReactive<String> tokenRepository = redissonClient.getBucket(token);
-        return tokenRepository.set(val)
+        long ttlSeconds = ttlMillis / 1000;
+        return tokenRepository.set(val, ttlSeconds, TimeUnit.SECONDS)
                 .then()
-                .doOnError(error -> logger.error("Error adding token to Redis: {}", error.getMessage()))
+                .doOnError(error -> logger.error("Error adding token to Redis with expiry: {}", error.getMessage()))
                 .onErrorResume(error -> Mono.empty());
     }
 

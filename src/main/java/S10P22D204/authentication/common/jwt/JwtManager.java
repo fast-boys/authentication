@@ -45,7 +45,7 @@ public class JwtManager {
         String jwt = generateToken(UUID.randomUUID().toString(), accessTokenValidTime, accessSecretKey);
         addCookie("ACCESS_TOKEN", exchange, jwt, accessTokenValidTime);
 
-        return tokenRepository.addToken(jwt, internalId)
+        return tokenRepository.addToken(jwt, internalId, accessTokenValidTime)
                 .then();
     }
 
@@ -53,44 +53,28 @@ public class JwtManager {
         String jwt = generateToken(UUID.randomUUID().toString(), refreshTokenValidTime, refreshSecretKey);
         addCookie("REFRESH_TOKEN", exchange, jwt, refreshTokenValidTime);
 
-        return tokenRepository.addToken(jwt, internalId)
+        return tokenRepository.addToken(jwt, internalId, refreshTokenValidTime)
                 .then();
     }
 
     public Mono<String> checkAccessToken(ServerWebExchange exchange) {
         return Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN"))
-                .doOnNext(cookie -> logger.info("ACCESS_TOKEN Value: {}", cookie.getValue())) // ACCESS_TOKEN 값 로깅
                 .flatMap(cookie -> tokenRepository.getToken(cookie.getValue())
-                        .doOnSuccess(internalId -> logger.info("Found internalId for ACCESS_TOKEN: {}", internalId)) // ACCESS_TOKEN으로 찾은 internalId 로깅
-                        .switchIfEmpty(Mono.defer(() -> {
-                            logger.info("ACCESS_TOKEN not found or expired, checking REFRESH_TOKEN"); // ACCESS_TOKEN 미발견 시 로깅
-                            return checkRefreshToken(exchange);
-                        }))
+                        .switchIfEmpty(Mono.defer(() -> checkRefreshToken(exchange)))
                 )
                 .defaultIfEmpty("null");
     }
 
-
     public Mono<String> checkRefreshToken(ServerWebExchange exchange) {
         return Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN"))
-                .doOnNext(cookie -> logger.info("REFRESH_TOKEN Value: {}", cookie.getValue())) // REFRESH_TOKEN 값 로깅
                 .flatMap(cookie -> tokenRepository.getToken(cookie.getValue())
-                        .doOnSuccess(internalId -> logger.info("Found internalId for REFRESH_TOKEN, regenerating tokens: {}", internalId)) // REFRESH_TOKEN으로 찾은 internalId 로깅
                         .flatMap(internalId ->
                                 tokenRepository.deleteToken(cookie.getValue())
                                         .then(regenerateToken(internalId, exchange))
-                                        .doOnSuccess(aVoid -> logger.info("Successfully regenerated tokens for internalId: {}", internalId)) // 토큰 재발급 성공 시 로깅
                                         .thenReturn(internalId))
                 )
-                .defaultIfEmpty("null")
-                .doOnSuccess(internalId -> {
-                    if ("null".equals(internalId)) {
-                        logger.info("REFRESH_TOKEN not found or invalid."); // REFRESH_TOKEN 미발견 시 로깅
-                    }
-                });
+                .defaultIfEmpty("null");
     }
-
-
 
     public Mono<Void> regenerateToken(String internalId, ServerWebExchange exchange) {
         return Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN"))
