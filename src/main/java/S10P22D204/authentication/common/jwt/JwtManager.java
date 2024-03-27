@@ -54,19 +54,27 @@ public class JwtManager {
     public Mono<String> checkAccessToken(ServerWebExchange exchange) {
         return Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN"))
                 .flatMap(cookie -> tokenRepository.getToken(cookie.getValue())
-                        .switchIfEmpty(checkRefreshToken(exchange).mapNotNull(internalId -> "null")))
+                        .switchIfEmpty(Mono.defer(() -> checkRefreshToken(exchange)))
+                )
                 .defaultIfEmpty("null");
     }
 
     public Mono<String> checkRefreshToken(ServerWebExchange exchange) {
         return Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN"))
                 .flatMap(cookie -> tokenRepository.getToken(cookie.getValue())
-                        .flatMap(internalId -> regenerateToken(internalId, exchange).thenReturn(internalId)))
+                        .flatMap(internalId ->
+                                tokenRepository.deleteToken(cookie.getValue())
+                                        .then(regenerateToken(internalId, exchange))
+                                        .thenReturn(internalId))
+                )
                 .defaultIfEmpty("null");
     }
 
+
     public Mono<Void> regenerateToken(String internalId, ServerWebExchange exchange) {
-        return createAccessToken(internalId, exchange)
+        return Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN"))
+                .flatMap(cookie -> tokenRepository.deleteToken(cookie.getValue()))
+                .then(createAccessToken(internalId, exchange))
                 .then(createRefreshToken(internalId, exchange));
     }
 
