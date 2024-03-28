@@ -62,6 +62,7 @@ public class JwtManager {
                 .flatMap(cookie -> tokenRepository.getToken(cookie.getValue())
                         .switchIfEmpty(Mono.defer(() -> checkRefreshToken(exchange)))
                 )
+                .switchIfEmpty(Mono.defer(() -> checkRefreshToken(exchange)))
                 .defaultIfEmpty("null");
     }
 
