@@ -25,6 +25,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> jwtManager.checkAccessToken(exchange)
                 .flatMap(internalId -> {
+                    System.out.println("final internal id = " + internalId);
                     if ("null".equals(internalId)) {
                         System.out.println("SUCCESS!!");
                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
