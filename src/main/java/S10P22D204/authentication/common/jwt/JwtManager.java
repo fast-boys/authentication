@@ -60,19 +60,24 @@ public class JwtManager {
     public Mono<String> checkAccessToken(ServerWebExchange exchange) {
         return Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN"))
                 .flatMap(cookie -> tokenRepository.getToken(cookie.getValue())
+                        .doOnNext(token -> logger.info("Found ACCESS_TOKEN: {}", token))
                         .switchIfEmpty(Mono.defer(() -> checkRefreshToken(exchange)))
                 )
-                .switchIfEmpty(Mono.defer(() -> checkRefreshToken(exchange)));
+                .doOnNext(token -> logger.info("ACCESS_TOKEN or refreshed token: {}", token))
+                .switchIfEmpty(Mono.defer(() -> checkRefreshToken(exchange)))
+                .doOnSuccess(token -> logger.info("Final token from checkAccessToken: {}", token));
     }
 
     public Mono<String> checkRefreshToken(ServerWebExchange exchange) {
         return Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN"))
                 .flatMap(cookie -> tokenRepository.getToken(cookie.getValue())
+                        .doOnNext(token -> logger.info("Found REFRESH_TOKEN: {}", token))
                         .flatMap(internalId ->
                                 regenerateToken(internalId, exchange)
                                         .thenReturn(internalId)
                         )
                 )
+                .doOnSuccess(token -> logger.info("Final token from checkRefreshToken: {}", token))
                 .defaultIfEmpty("null");
     }
 
@@ -82,9 +87,12 @@ public class JwtManager {
                         tokenRepository.deleteToken(cookie.getValue())
                                 .then(createAccessToken(internalId, exchange))
                                 .then(createRefreshToken(internalId, exchange))
+                                .doOnSuccess(aVoid -> logger.info("Tokens regenerated for internalId: {}", internalId))
                 )
-                .thenReturn(internalId);
+                .thenReturn(internalId)
+                .doOnSuccess(token -> logger.info("Returning internalId from regenerateToken: {}", token));
     }
+
 
     /**
      * Generating Token
