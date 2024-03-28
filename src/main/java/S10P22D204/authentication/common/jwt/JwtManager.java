@@ -70,7 +70,7 @@ public class JwtManager {
         return Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN"))
                 .flatMap(cookie -> tokenRepository.getToken(cookie.getValue())
                         .flatMap(internalId ->
-                                tokenRepository.deleteToken(cookie.getValue())
+                                tokenRepository.getToken(cookie.getValue())
                                         .then(regenerateToken(internalId, exchange))
                                         .thenReturn(internalId))
                 )
