@@ -62,8 +62,7 @@ public class JwtManager {
                 .flatMap(cookie -> tokenRepository.getToken(cookie.getValue())
                         .switchIfEmpty(Mono.defer(() -> checkRefreshToken(exchange)))
                 )
-                .switchIfEmpty(Mono.defer(() -> checkRefreshToken(exchange)))
-                .defaultIfEmpty("null");
+                .switchIfEmpty(Mono.defer(() -> checkRefreshToken(exchange)));
     }
 
     public Mono<String> checkRefreshToken(ServerWebExchange exchange) {
@@ -116,7 +115,7 @@ public class JwtManager {
      */
     private void addCookie(String tokenType, ServerWebExchange exchange, String jwt, long expireTime) {
         ResponseCookie cookie = ResponseCookie.from(tokenType, jwt)
-                .httpOnly(true)
+                .httpOnly(false)
                 .secure(false)
                 .path("/")
                 .maxAge(expireTime / 1000)
