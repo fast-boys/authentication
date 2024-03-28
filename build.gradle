@@ -26,9 +26,6 @@ ext {
 }
 
 dependencies {
-	// spring security
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	testImplementation 'org.springframework.security:spring-security-test'
 
 	// webflux reactor
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
