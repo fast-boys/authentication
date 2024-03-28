@@ -73,14 +73,17 @@ public class JwtManager {
                                         .thenReturn(internalId)
                         )
                 )
-                .switchIfEmpty(Mono.just("null"));
+                .defaultIfEmpty("null");
     }
 
-    public Mono<Void> regenerateToken(String internalId, ServerWebExchange exchange) {
+    public Mono<String> regenerateToken(String internalId, ServerWebExchange exchange) {
         return Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN"))
-                .flatMap(cookie -> tokenRepository.deleteToken(cookie.getValue()))
-                .then(createAccessToken(internalId, exchange))
-                .then(createRefreshToken(internalId, exchange));
+                .flatMap(cookie ->
+                        tokenRepository.deleteToken(cookie.getValue())
+                                .then(createAccessToken(internalId, exchange))
+                                .then(createRefreshToken(internalId, exchange))
+                )
+                .thenReturn(internalId);
     }
 
     /**
