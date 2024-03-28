@@ -39,9 +39,12 @@ public class JwtAuthenticationFilter implements WebFilter {
         return jwtManager.checkAccessToken(exchange)
                 .flatMap(internalId -> {
                     if ("null".equals(internalId)) {
+                        System.out.println("FAILED");
                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                         return exchange.getResponse().setComplete();
                     } else {
+                        System.out.println("SUCCESS");
+
                         ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate();
 
                         requestBuilder.header(jwtManager.INTERNAL_ID_HEADER, internalId);
