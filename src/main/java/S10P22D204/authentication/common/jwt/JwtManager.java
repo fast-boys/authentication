@@ -73,7 +73,7 @@ public class JwtManager {
                                         .thenReturn(internalId)
                         )
                 )
-                .defaultIfEmpty("null");
+                .switchIfEmpty(Mono.just("null"));
     }
 
     public Mono<Void> regenerateToken(String internalId, ServerWebExchange exchange) {
