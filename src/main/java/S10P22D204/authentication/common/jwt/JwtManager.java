@@ -119,8 +119,9 @@ public class JwtManager {
      */
     private void addCookie(String tokenType, ServerWebExchange exchange, String jwt, long expireTime) {
         ResponseCookie cookie = ResponseCookie.from(tokenType, jwt)
-                .httpOnly(true)
+                .httpOnly(false)
                 .secure(true)
+                .sameSite("None")
                 .path("/")
                 .maxAge(expireTime / 1000)
                 .build();
