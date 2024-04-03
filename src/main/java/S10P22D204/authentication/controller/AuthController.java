@@ -1,5 +1,6 @@
 package S10P22D204.authentication.controller;
 
+import S10P22D204.authentication.common.jwt.JwtManager;
 import S10P22D204.authentication.common.response.Response;
 import S10P22D204.authentication.service.GoogleService;
 import S10P22D204.authentication.service.KakaoService;
@@ -15,6 +16,7 @@ public class AuthController {
 
     private final KakaoService kakaoService;
     private final GoogleService googleService;
+    private final JwtManager jwtManager;
 
     @GetMapping("/kakao")
     public Mono<Response> kakaoLogin(@RequestParam String code, ServerWebExchange exchange){
@@ -26,6 +28,12 @@ public class AuthController {
     public Mono<Response> googleLogin(@RequestParam String code, ServerWebExchange exchange){
         return googleService.googleLogin(code, exchange)
                 .map(result -> new Response("login", result));
+    }
+
+    @GetMapping("/logout")
+    public Mono<Response> logout(ServerWebExchange exchange){
+        return jwtManager.logout(exchange)
+                .map(result -> new Response("logout", result));
     }
 
 }

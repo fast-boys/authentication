@@ -86,6 +86,25 @@ public class JwtManager {
                 .thenReturn(internalId);
     }
 
+    public Mono<String> logout(ServerWebExchange exchange) {
+        Mono<Void> removeAccessToken = Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN"))
+                .flatMap(cookie ->
+                        tokenRepository.deleteToken(cookie.getValue())
+                                .then(Mono.fromRunnable(() ->
+                                        clearCookie(exchange, "ACCESS_TOKEN")))
+                );
+
+        Mono<Void> removeRefreshToken = Mono.justOrEmpty(exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN"))
+                .flatMap(cookie ->
+                        tokenRepository.deleteToken(cookie.getValue())
+                                .then(Mono.fromRunnable(() ->
+                                        clearCookie(exchange, "REFRESH_TOKEN")))
+                );
+
+        return Mono.when(removeAccessToken, removeRefreshToken)
+                .thenReturn("logout complete");
+    }
+
 
     /**
      * Generating Token
@@ -119,7 +138,7 @@ public class JwtManager {
      */
     private void addCookie(String tokenType, ServerWebExchange exchange, String jwt, long expireTime) {
         ResponseCookie cookie = ResponseCookie.from(tokenType, jwt)
-                .httpOnly(false)
+                .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
                 .path("/")
@@ -127,5 +146,22 @@ public class JwtManager {
                 .build();
 
         exchange.getResponse().getCookies().add(tokenType, cookie);
+    }
+
+    /**
+     * Clears the specified token cookie.
+     * @param exchange The current server web exchange.
+     * @param cookieName The name of the cookie to clear.
+     */
+    private void clearCookie(ServerWebExchange exchange, String cookieName) {
+        ResponseCookie deletedCookie = ResponseCookie.from(cookieName, "")
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .maxAge(0) // Set max age to 0 to delete the cookie
+                .build();
+
+        exchange.getResponse().getCookies().set(cookieName, deletedCookie);
     }
 }
